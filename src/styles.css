@@ -1,3 +1,81 @@
-/* You can add global styles to this file, and also import other style files */
+/* ChefMate theme — the ONLY file where visual decisions (colors, radius) live.
+   Components consume semantic tokens exclusively; retheming the app = editing this file.
+   Enforced by `npm run lint:styles` (scripts/check-styling.mjs). */
 
 @import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Three device tiers, mobile-first: unprefixed utilities style phones, `md:` = tablets/iPads,
+   `lg:` = desktop. sm/xl/2xl are removed so only the two tier breakpoints exist
+   (also enforced by lint:styles). */
+@theme {
+  --breakpoint-*: initial;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+}
+
+/* Layer 1: theme values. Runtime-switchable (dark mode = flipping these under `.dark`).
+   Current values are functional placeholders — tune them when visual design starts. */
+:root {
+  --background: oklch(0.99 0.002 85);
+  --foreground: oklch(0.2 0.01 85);
+  --muted: oklch(0.955 0.005 85);
+  --muted-foreground: oklch(0.5 0.01 85);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --border: oklch(0.9 0.005 85);
+  --input: var(--border);
+  --primary: oklch(0.63 0.17 45);
+  --primary-foreground: oklch(0.985 0.01 45);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.985 0.01 27);
+  --ring: var(--primary);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(0.17 0.005 85);
+  --foreground: oklch(0.95 0.005 85);
+  --muted: oklch(0.23 0.006 85);
+  --muted-foreground: oklch(0.68 0.01 85);
+  --card: oklch(0.21 0.006 85);
+  --border: oklch(0.29 0.008 85);
+  --primary: oklch(0.7 0.16 45);
+  --primary-foreground: oklch(0.2 0.02 45);
+  --destructive: oklch(0.65 0.19 27);
+  --destructive-foreground: oklch(0.98 0.01 27);
+}
+
+/* Layer 2: expose the tokens as Tailwind utilities
+   (bg-background, text-muted-foreground, border-input, rounded-md, …). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 0.25rem);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}

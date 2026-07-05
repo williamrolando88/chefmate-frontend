@@ -20,6 +20,7 @@ Load-bearing rules (full rationale and templates in `ARCHITECTURE.md`):
 - `npm start` — dev server (`ng serve`)
 - `npm run build` — production build
 - `npm test` — unit tests (Vitest via `ng test`, builder `@angular/build:unit-test`)
+- `npm run lint:styles` — styling token rules check (`scripts/check-styling.mjs`; also runs as a PostToolUse hook on every Edit/Write)
 - `npx prettier --write <files>` — format (`.prettierrc`: 100-char width, single quotes, Angular HTML parser)
 
 After generating or changing code, run `npm run build` and fix any errors before finishing.
@@ -27,6 +28,7 @@ After generating or changing code, run `npm run build` and fix any errors before
 ## AI tooling in this repo
 
 - **`architecture` skill** (`.claude/skills/architecture/`) — project skill for this repo's hexagonal architecture. Use it when creating features, ports, adapters, business services, or deciding where code goes. It condenses `ARCHITECTURE.md` into operational templates.
+- **`ui-styling` skill** (`.claude/skills/ui-styling/`) — project skill for theming and the UI kit. Use it whenever styling anything: templates, `src/app/ui/` primitives, tokens, colors, dark mode. Canonical for the rules summarized under "Styling & theming" below.
 - **`angular-developer` skill** (`.claude/skills/angular-developer/`) — official Angular team skill. Use it for components, reactivity (signals, linkedSignal, resource), forms, DI, routing, a11y, styling/Tailwind, and testing. Its `references/` docs are the source of truth for framework APIs. Kept unmodified so it can be updated from upstream; where its generic advice conflicts with `ARCHITECTURE.md`, `ARCHITECTURE.md` wins.
 - **Angular CLI MCP server** (`.mcp.json`) — provides `search_documentation`, `get_best_practices`, `list_projects`, `run_target`, and dev-server control. Prefer `search_documentation` over guessing framework behavior.
 - Angular docs index for LLMs: https://angular.dev/llms.txt
@@ -82,10 +84,19 @@ After generating or changing code, run `npm run build` and fix any errors before
 
 - Must pass AXE checks and meet WCAG AA minimums: focus management, color contrast, ARIA attributes
 
+## Styling & theming (see `ui-styling` skill for full rules)
+
+The app is function-first: all appearance flows from semantic design tokens in `src/styles.css` (shadcn vocabulary: `background`, `foreground`, `muted`, `card`, `primary`, `destructive`, `ring`, `radius`), consumed via the owned UI kit in `src/app/ui/` (attribute directives on native elements). Retheming, including dark mode, means editing `src/styles.css` only.
+
+- Semantic token utilities only (`bg-primary`, `text-muted-foreground`) — raw palette classes (`bg-red-500`, `bg-white`), arbitrary color literals, and `dark:` variants are banned outside `src/styles.css`. Enforced by `npm run lint:styles` + PostToolUse hook.
+- Feature templates: layout utilities only (`flex`, `gap-*`, `p-*`); appearance lives in `ui/` primitives and tokens.
+- Interactive state styled via ARIA/data attributes (`aria-expanded:`, `disabled:`); behavior from `@angular/aria` or native elements, never from styled component libraries.
+- Mobile-first, three device tiers: unprefixed utilities = phones (design here first), `md:` = tablets/iPads (≥768px), `lg:` = desktop (≥1024px). `sm:`/`xl:`/`2xl:` are removed from the theme and `max-*:` variants are banned (enforced by lint). Responsive layout belongs to feature templates; `ui/` primitives stay viewport-agnostic.
+
 ## Project conventions
 
 - v20+ file naming: `recipe-list.ts` / `recipe-list.html` / `recipe-list.css` (no `.component.` suffix); class names without suffix (`App`, not `AppComponent`)
 - Component selector prefix: `app-`
 - Scaffold view-layer artifacts with the Angular CLI (`ng generate`); `domain/`, `data/`, and `core/` files are written by hand — the CLI would stamp Angular decorators onto code that must stay Angular-free
 - Non-Angular files follow the same hyphenated naming, matching the identifier: `StoragePort` → `storage-port.ts`
-- Styling: Tailwind utilities first (global setup in `src/styles.css`); per-component CSS only for what utilities can't express
+- Styling: Tailwind utilities first (global setup in `src/styles.css`); per-component CSS only for what utilities can't express, and then only via `var(--color-*)` tokens

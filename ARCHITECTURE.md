@@ -144,6 +144,8 @@ src/app/
 │     ├─ recipe-list.ts/.html     # view layer lives at the feature root (or subfeature folders)
 │     ├─ provide-recipes.ts       # feature composition
 │     └─ recipes.routes.ts        # lazy-loaded
+├─ ui/                            # shared view-layer primitives (design-system kit): pure
+│                                 # presentation directives, no services/ports (ui-styling skill)
 ├─ app.config.ts                  # app composition root
 └─ app.routes.ts
 ```
